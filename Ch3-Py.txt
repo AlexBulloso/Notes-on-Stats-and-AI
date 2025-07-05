@@ -1,0 +1,547 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "06da3bb0",
+   "metadata": {},
+   "source": [
+    "### Ch 3 - Linear Regression"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "4c804e2d",
+   "metadata": {},
+   "source": [
+    "#### 3.0 Intro\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c834f479",
+   "metadata": {},
+   "source": [
+    "\n",
+    "- Many fancy statistical learning approaches are generalisations or extensions of linear regression\n",
+    "\n",
+    "Questions that may be asked given data:\n",
+    "- Is there a relationship between any X and Y?\n",
+    "- How strong is this relationship?\n",
+    "- What X are associated with Y?\n",
+    "- How strong are these relationships?\n",
+    "- How accurately can we predict Y?\n",
+    "- Is the relationship linear?\n",
+    "- Is there synergy among Xs?"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "9e937906",
+   "metadata": {},
+   "source": [
+    "#### 3.1 Simple Linear Regression"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "4c9586e2",
+   "metadata": {},
+   "source": [
+    "Simple linear regression is very straightforward. It approximates a linear relationship. Given a predictor variable X and a quantitative response Y:\n",
+    "$$Y \\approx \\beta_0 + \\beta_1 X$$\n",
+    "For example:\n",
+    "$$\\text{sales} \\approx \\beta_0 + \\beta_1 \\times TV$$\n",
+    "Beta 0 and 1 are the model coefficients/parameters. $\\hat{\\beta_0}, \\hat{\\beta_1}$ are estimators generated from training data and are used to compute $\\hat{y}$, the prediction of Y based on X = x in $\\hat{y} = \\hat{\\beta_0}+\\hat{\\beta_1}x.$"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3ebb8081",
+   "metadata": {},
+   "source": [
+    "\n",
+    "Let there be n observation pairs, $(x_n, y_n)$. We want to find estimators \n",
+    "$\\hat{\\beta_0}, \\hat{\\beta_1}$ such that the line $\\hat{y} = \\hat{\\beta_0}+\\hat{\\beta_1}x$ is as close as possible to the data points. One of the ways of doing this is the least squares criterion:\n",
+    "\n",
+    "Given $\\hat{y} = \\hat{\\beta_0}+\\hat{\\beta_1}x$, let $e_i = y_i - \\hat{y_i}$, representing the ith residual (difference between the ith observed response, $\\hat{y_i}$ and $y_i$). The residual sum of squares, RSS, is defined as follows. The following are all equivalent:\n",
+    "\n",
+    "$$\\text{RSS}=e_1^2 + e_2^2+\\dots+e^2_n$$\n",
+    "$$=\\sum_{i=1}^{n}e_i^2$$\n",
+    "$$=\\sum_{i=1}^{n}(y_i-\\hat{\\beta_0}-\\hat{\\beta_1}x_n)^2$$\n",
+    "\n",
+    "To minimise, use partial derivatives $\\frac{\\partial S}{\\partial \\beta_0}$ and $\\frac{\\partial S}{\\partial \\beta_1}$, set equal to 0. After some calculations, you reach:\n",
+    "$$\\hat{\\beta_1}=\\frac{\\sum^{n}_{i=1}(x_i-\\bar{x})(y_i-\\bar{y})}{\\sum^{n}_{i=1}(x_i-\\bar{x})^2}$$\n",
+    "\n",
+    "$$\\hat{\\beta}_0=\\bar{y}-\\hat{\\beta_1}\\hat{x}$$\n",
+    "\n",
+    "Note that the formula for $\\hat{\\beta}_1$ is equal to $\\frac{\\sum^{n}_{i=1}x_iy_i-n\\bar{x}\\bar{y}}{\\sum^{n}_{i=1}x_i^2-n\\bar{x}^2}$ (obtained when solving pde, xbar and ybar are the sample means, eg. ybar is 1/n * sum(y_i))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a115e31e",
+   "metadata": {},
+   "source": [
+    "The true relationship between X and Y is $Y=f(X)+\\epsilon$ where $\\epsilon$ is a catch-all, mean-zero, independent, random error term such that if we approximate a linear relationship, we would get $Y = \\beta_0 + \\beta_1X+ \\epsilon$.\n",
+    "\n",
+    "**See Figure 3.3:**\n",
+    "- Population regression line is the best linear approximation to true relationship between X and Y (unobserved in real life)\n",
+    "- Least squares line is characterised by the least squares regression coefficient estimates\n",
+    "\n",
+    "**The difference between the lines arises due to sampling from a large population.**\n",
+    "- Suppose we want the unknown population mean $\\mu$ of $Y$.\n",
+    "- We have access to n observations from $Y, (y_0,\\ldots,y_n)$ \n",
+    "- A reasonable estimate for the population mean $\\mu$ is the sample mean $\\bar{y}=\\frac{1}{n}\\sum_{i=1}^{n}y_i$\n",
+    "- Similarly, the unknown beta coefficients are estimated by the hat beta coefficients.\n",
+    "\n",
+    "**Bias**\n",
+    "- Using the sample mean to estimate the population mean is unbiased as on average (large number of estimates) we would expect them to equal exactly. \n",
+    "- This property (being unbiased) holds true for least squares coeffcient too.\n",
+    "\n",
+    "**How accurate is the sample mean as an estimate of the population mean?**\n",
+    "- A single estimate may be a substantial over/underestimate.\n",
+    "- This is answered by the standard error (SE) of the sample mean:\n",
+    "$$\\text{Var}(\\hat{\\mu})=\\text{SE}(\\hat{\\mu})^2=\\frac{\\sigma^2}{n}$$\n",
+    "- sigma is the standard deviation of each of yi of Y. The SE decreases as n increases.\n",
+    "\n",
+    "**How accurate are the estimated beta coefficents?**\n",
+    "- $$\\text{SE}(\\hat{\\beta_0})^2=\\sigma^2\\left[\\frac{1}{n}+\\frac{\\bar{x}^2}{\\sum_{i=1}^n(x_i-\\bar{x})^2}\\right]$$\n",
+    "- $$\\text{SE}(\\hat{\\beta_1})^2=\\frac{\\sigma^2}{\\sum_{i=1}^n(x_i-\\bar{x})^2}$$\n",
+    "- sigma^2 is the variance of epsilon (error) here\n",
+    "- Assumptions:\n",
+    "  - The errors have a common variance (homoskedascticity)\n",
+    "  - No autocorrelation"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "6e0d582a",
+   "metadata": {
+    "vscode": {
+     "languageId": "plaintext"
+    }
+   },
+   "source": [
+    "- Notes:\n",
+    "    - Formula for SE of hat beta 1 is smaller when x_is are more spread out since the slope can be estimated better then\n",
+    "    - SE of hat beta 1 would be the same as SE of mean response hat mu when the mean of x (xbar) is 0. This also means hat beta 0, y-intercept, would equal to mean of y (ybar).\n",
+    "    - Sigma squared is not known but can be estimated from the data. The estimate for sigma is known as the residual standard error: $\\text{RSE} = \\sqrt{\\text{RSS}/(n-2)}$.\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "28a2b27a",
+   "metadata": {},
+   "source": [
+    "**Confidence Intervals**\n",
+    "- SEs can be used to compute confidence intervals, with a 95% CI defined as the values where with 95% probability, the range will contain the true unknown value. \n",
+    "- 95% of the intervals sampled will contain the true unknown value of the parameter.\n",
+    "- For linear regression, 95% CI for $\\hat{\\beta_1}$ approximately $\\hat{\\beta_1}\\pm2\\cdot\\text{SE}(\\hat{\\beta_1})$\n",
+    "\n",
+    "**Hypothesis testing**\n",
+    "\n",
+    "SEs can be used to test null vs alternative hypotheses\n",
+    "-  $H_0:\\text{There is no relationship between X and Y}, \\beta_1 = 0$\n",
+    "-  $H_a:\\text{There is some relationship between X and Y}, \\beta_1 \\neq 0$\n",
+    "\n",
+    "- This is because when beta 1 is 0, the model reduces to Y = beta 0 + epsilon such that X is independent of Y.\n",
+    "- To test H0, we need to check if our estimate $\\hat{\\beta_0}$ is sufficiently far from 0. This is dependent on SE.\n",
+    "- In practice, a t-statistic is computed: \n",
+    "$$t = \\frac{\\hat{\\beta_1}}{\\text{SE}(\\hat{\\beta_1})}$$\n",
+    "- The t-statistic measures the number of standard deviations, sigma, hat beta 1 is away from 0. \n",
+    "  - No relationship between X and Y will have a t-distribution with n-2 degrees of freedom.\n",
+    "  - For samples > 30, the t-distribution approximates the standard normal distribution.\n",
+    "  - The probability of observing results equal or greater than $|t|$ is referred to the p-value\n",
+    "    - Small p-valies = unlikely to observe substantial associations between predictor and response due to chance, in absence of association between X and Y\n",
+    "    - ie. Small p-values reject H0\n",
+    "    - Typical cutoffs are 5% and 1%.\n",
+    "\n",
+    "**Testing the accuracies of our model**\n",
+    "- The quality of the linear regression fit can be assessed using *residual standard error*, RSE, and the R^2 statistic.\n",
+    "\n",
+    "RSE:\n",
+    "$$\\text{RSE} = \\sqrt{\\frac{1}{n-2}\\text{RSS}}$$\n",
+    "- Note that RSS = residual sum of squares, the sum of the squares of the residuals when you subtract the actual and predicted response values by the model: $\\text{RSS} = \\sum_{i=1}^{n}(y_i-\\hat{y_i})^2$ \n",
+    "- RSE tells us how much on average the model deviates from the true value even if the model was the perfect one.\n",
+    "- If $\\hat{y} \\approx y_i$ for all i then the model fits very well.\n",
+    "\n",
+    "R^2 Statistic:\n",
+    "- RSE is measured in units of Y so its not always clear what a good RSE is. The R^2 statistic is an alternative - a proportion of variance independent of Y:\n",
+    "$$R^2=\\frac{\\text{TSS}-\\text{RSS}}{\\text{TSS}}$$\n",
+    "- Note that TSS = total sum of squares, the sum of the squares of the differences between the actual values and the mean of predicted values, ybar: $\\text{TSS} = \\sum_{i=1}^{n}(y_i-\\bar{y})^2$ \n",
+    "- TSS is the total variance in Y. RSS measures the variability unexplained after performing the regression. So, TSS - RSS is the explained regression. \n",
+    "  - R^2 close to 1 means that most variability is explained by regression.\n",
+    "  - R^2 close to 0 can occur if the linear model is wrong, or error variance (sigma squared) is high, or both.\n",
+    "\n",
+    "Correlation:\n",
+    "$$\\text{Cor}(X,Y) = \\frac{\\sum_{i=1}^n(x_i-\\bar{x})(y_i-\\bar{y})}{\\sqrt{\\sum_{i=1}^n({x_i-\\bar{x}})^2} \\sqrt{\\sum_{i=1}^n({y_i-\\bar{y}})^2}}$$\n",
+    "- This is another measure of the linear relationship of X and Y. r = Cor(X,Y) can be another metric to assess fit of linear model. It can be shown that the R^2 statistic is equal to r^2, the squared correlation.\n",
+    "- The concept of correlation does not extend automatically to multiple linear regression as correlation qualifies one pair of variables rather than many variables."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7628e73f",
+   "metadata": {},
+   "source": [
+    "#### 3.2 Multiple Linear Regression"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d58c1931",
+   "metadata": {},
+   "source": [
+    "- In practice we have many predictors. One option is to run many seperate simple linear regressions. This is not the best way as it is unclear how to make a single prediction given three separate equations. Also, each regression equation would ignore the other equations. \n",
+    "- An alternative is to extend the simple linear regression model to accomodate multiple predictors. If we have p distinct predictors, our equation becomes:\n",
+    "$$Y = \\beta_0 + \\beta_1X_1 + \\beta_2X_2 + \\cdots + \\beta_pX_p + \\epsilon$$\n",
+    "- Here, each $X_j$ represents the $j$th predictor and $\\beta_j$ is the association between that predictor and the response. $\\beta_j$ is the average effect of Y of a one unit increase on X when all other predictors are fixed.\n",
+    "\n",
+    "**Estimating the Regression Coefficients**\n",
+    "- Once again the regression coefficients must be estimated, giving us the following for each y:\n",
+    "$$\\hat{y} = \\hat{\\beta_0}+\\sum_{j=1}^{p}\\hat{\\beta_j}x_j$$\n",
+    "- Again we use the same least squares approach. However, this time, we have hat y replaced with the larger multiple regression equation:\n",
+    "- \n",
+    "$$\\text{RSS}=\\sum_{i=1}^n(y_i-\\hat{y}_i)^2$$\n",
+    "\n",
+    "\n",
+    "$$\\text{RSS} =\\sum_{i=1}^n(y_i-\\hat{\\beta_0}-\\sum_{j=1}^p\\hat{\\beta_j}x_{ij})^2 $$\n",
+    "\n",
+    "- The values for which hat beta j minimises RSS are the coefficient estimates. These can be obtained from matrix algebra but are not included here.\n",
+    "- Differences arise (as demonstrated in table 3.4) between the multiple linear regression model and the many simple linear regression model. \n",
+    "- In the example provided, there is a relatively high correlation between radio and newspaper in table 3.5. This is why in the many simple model, the t-statistic for radio is significant while independent of other predictors, but in the multiple linear model, it is no longer significant.\n",
+    "- Above can be used to show that correlation is not causation by confounding variable\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8ec312b0",
+   "metadata": {},
+   "source": [
+    "\n",
+    "**Important Questions for Multiple linear regression**\n",
+    "1. Is at least one of the predictors (X1 - Xp) useful in predictions?\n",
+    "2. Do all predictors explain Y, or is only a subset useful?\n",
+    "3. How well does the model fit the data?\n",
+    "4. Given predictor values, what response value should we predict and how accurate is our prediction?\n",
+    "\n",
+    "**1. Is there a relationship between X and Y in the first place?**\n",
+    "- We use a hypothesis test to answer this:\n",
+    "$$H_0 : \\beta_1=\\beta_2=\\dots=\\beta_p=0$$\n",
+    "$$H_a : \\text{at least one }\\beta_j \\text{is non-zero.}$$\n",
+    "- This can be performed by computing the F-statistic:\n",
+    "$$F = \\frac{(\\text{TSS}-\\text{RSS}/p)}{\\text{RSS}/(n-p-1)}$$ \n",
+    "- TSS and RSS are the same as in linear regression. Assuming the linear model is true, the following holds:\n",
+    "- $\\text{E}(\\text{RSS}/(n-p-1))=\\sigma^2$ (residual variance estimates true error variance)\n",
+    "- $\\text{E}(\\text{TSS}-\\text{RSS}/p)=\\sigma^2$ under H_0 (Explained variance is due to random variation under H_0)\n",
+    "- Hence, F-statistic near 1 is evidence for H_0. F > 1 (due to numerator over sigma squared) is evidence for H_a.\n",
+    "- How large does the F-statistic need to be before we reject H_0? This depends on the values n and p. \n",
+    "  - When n is large, then an F statistic a little larger than 1 can provide evidence against H_0. \n",
+    "  - When H_0 is true and the errors epsilon_i have a normal distribution, F-statistic follows an F-distribution. A p-value can then be caclulated from this. Based off this p-value, we can determine whether or not to reject H_0. \n",
+    "\n",
+    "\n",
+    "Sometimes we are interested in if only a subset of q oefficients are zero:\n",
+    "$$H_0 : \\beta_{p-q+1}=\\beta_{p-q+2}=\\dots=\\beta_{p-q+q}=0$$\n",
+    "We let the RSS for this model be $\\text{RSS}_0$. Therefore:\n",
+    "$$F = \\frac{\\text{RSS}_0-\\text{RSS}/q}{\\text{RSS}/(n-p-1)}$$\n",
+    "- Note: The F-statistic and relevant p-value for when a singular predictor is omitted in the F-statistic is the same as the t-statistic and p-value of the multiple linear regression. Hence, it reports the partial effect of that singular predictor when added (additional contribution it makes)\n",
+    "\n",
+    "Why do we need to look at the overall F-statistic? It seems that if any one of the p-values is small, then at least one of the X is related to Y, right? This is incorrect especially if p is large:\n",
+    "- Consider p = 100 and H_0 is true. If we set the threshold of the p-value to 0.05, then by chance, 5% of the p-values would be seen as significant (type 1 errors).\n",
+    "- The F-statistic does not suffer from this problem by adjusting for the number of predictions such that if H_0 is true, there is still only a 5% chance of a type 1 error.\n",
+    "\n",
+    "F-statistics work when p is relatively small and smaller compared to n. Sometimes, we have a large number of variables. If p > n then there are more coeffcients than observations and we cannot use the multiple linear regression model. Instead, we use higher dimensional methods such as forward selection.\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ed68af53",
+   "metadata": {},
+   "source": [
+    "**2. Which variables are important?**\n",
+    "\n",
+    "The F-statistic is the first step when faced with multiple regression. If, by p-value, at elast one of X relates to Y, we can ask which of X relate to Y. The task of determining which subset of Xs relates to Y is variable selection.\n",
+    "\n",
+    "Ideally, to perform variable selection we can test several models with different subsets of Xs. We can then use metrics to compare these models:\n",
+    "- Mallow's C_p\n",
+    "- Akaike information criterion\n",
+    "- Bayesion information criterion (BIC)\n",
+    "- Adjusted R^2\n",
+    "\n",
+    "Although for p predictors, we would need 2^p models to test which is impractical for large p. There are three approaches for this task:\n",
+    "- Forward selection (always usable)\n",
+    "  - Begin with null model (no Xs).\n",
+    "  - Fit p simple linear regressions and the model with lowest RSS to null model\n",
+    "  - Add another model for the lowest RSS in the two-variable method\n",
+    "  - Repeat until stopping rule\n",
+    "- Backward selection (not usable if p > n)\n",
+    "  - Begin will all variables \n",
+    "  - Remove variable with largest p-value (least statistically significant)\n",
+    "  - Repeat until stopping rule\n",
+    "- Mixed selection\n",
+    "  - Mixture of forward/backward selection\n",
+    "  - Start with null model and repeatedly add best fitting predictor\n",
+    "  - As Xs increase, p-values for Xs can become larger. If at any point the p-value for a variable rises, that X is removed.\n",
+    "  - Repeat until all variables have low p-values and all variables outside would have a large p-value if added\n",
+    " "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a9694acb",
+   "metadata": {},
+   "source": [
+    "**3. Model Fit**\n",
+    "\n",
+    "Like simple regression, common measures of model fit are RSE and R^2. In simple regression, R^2 is $\\text{Cor}(X,Y)^2$ while in multiple regression, $\\text{Cor}(Y,\\hat{Y})^2$, the square of the correlation between the response and the fitted model. The fitted linear model maximises this for all linear models.\n",
+    "- R^2 close to 1 = large portion of variance in response variable\n",
+    "  - Caveat: R^2 always increases when more Xs are added even if that X is non-significant as this decreases RSS in training data, so R^2 (which is based of training data) also increases. ie, a higher R^2 does not necessarily mean the model is better, it could be overfitting.\n",
+    "- RSEs can increase on addition of more Xs even if RSS decreases as RSE is defined as $\\text{RSE} = \\sqrt{\\frac{1}{n-p-1}\\text{RSS}}$.\n",
+    "\n",
+    "Plotting the data can also be useful to identify where models over/underfit."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d8082991",
+   "metadata": {},
+   "source": [
+    "**4. Predictions**\n",
+    "\n",
+    "After fitting the model, you can apply the formula to predict Y on a basis of all X. There are uncertainties associated with this:\n",
+    "1. The model's coefficients are only estimates for the true coefficients of the regression plane. This is related to the reducible error. We can compute a CI to find how close our model is to f(X)\n",
+    "2. Model bias by virtue of assuming that the actual relationship is linear.\n",
+    "3. There is random error epsilon in the model (irreducible rror). We use prediction intervals to find how much Y will vary from hat Y.\n",
+    "\n",
+    "- A 95% CI tells you that 95% of intervals of that form will contain the true value of f(X) (a repeatable part, no random noise). \n",
+    "- A 95% PI tells you that 95% of intervals of that form will contain the true value of Y (a one off, observed result with irreducible random noise)."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "27b8cfb9",
+   "metadata": {},
+   "source": [
+    "#### 3.3 Considerations in the Regression Model"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3616956c",
+   "metadata": {},
+   "source": [
+    "##### **Qualitative Predictors**"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d544efd1",
+   "metadata": {},
+   "source": [
+    "\n",
+    "- In practice, some predictors are also qualitative\n",
+    "\n",
+    "For predictors with two levels, we can create a dummy variable that takes into account two possible values (one-hot encoding)\n",
+    "$$x_i = \\begin{cases} 1 & \\text{case 1} \\\\ 0 & \\text{case not 1}\\end{cases}$$\n",
+    "Then use this in the regression equation:\n",
+    "$$y_i = \\beta_0 + \\beta_1x_i + \\epsilon_i = \\begin{cases} \\beta_0 + \\beta_1 + \\epsilon & \\text{case 1} \\\\ \\beta_0 + \\epsilon & \\text{case not 1}\\end{cases} $$\n",
+    "- Beta 0 is interpreted as the average y_i for case 2, while beta 0 + beta 1 is the average y_i for case 1. Beta 1 is the average difference between cases.\n",
+    "- The type of coding is arbitrary - the cases can be rewritten with +1 and -1 instead. The difference would then lie in the interpretation of the coefficients.\n",
+    "\n",
+    "For predictors with more than two variables, we can set up more dummy variables: \n",
+    "\n",
+    "$$x_{i1} = \\begin{cases} 1 & \\text{case 1} \\\\ 0 & \\text{case not 1}\\end{cases}$$\n",
+    "$$x_{i2} = \\begin{cases} 1 & \\text{case 2} \\\\ 0 & \\text{case not 2}\\end{cases}$$\n",
+    "\n",
+    "The final regression equation would then be:\n",
+    "$$y_{i} = \\beta_0 + \\beta_1x_{i1} + \\beta_2x_{i2}+ \\epsilon_i\\begin{cases} \\beta_0 + \\beta_1 +\\epsilon_i & \\text{case 1} \\\\ \\beta_0 + \\beta_2 +\\epsilon_i & \\text{case 2} \\\\ \\beta_0 + \\epsilon_i & \\text{case 3}\\end{cases}$$\n",
+    "\n",
+    "In this way, you can integrate both qualitative and quantitative variables into a regression equation. There are different ways to code qualitative variables, desgined to measure particular contrasts, but this is beyond the scope of the book."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "77872715",
+   "metadata": {},
+   "source": [
+    "##### **Extensions of the Linear Model**"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f4fb8f75",
+   "metadata": {},
+   "source": [
+    "Important restrictions of the linear model are that it is additive and linear:\n",
+    "- Additivity assumes that association between one X and Y is independent from other Xs.\n",
+    "- Linearity assumes that the change in response in Y per one unit change in X is constant.\n",
+    "\n",
+    "The following examines classical approaches for extending the linear model\n",
+    "\n",
+    "*Removing the Additive Assumption*\n",
+    "- For example, increasing x1 may increase the slope term beta 2, a completely different variable. This is an interaction effect. One way to extend this to the model is to add an interaction term:\n",
+    "$$Y = \\beta_0 + \\beta_1X_1 + \\beta_2X_2 + \\beta_3X_1X_2 + \\epsilon$$\n",
+    "$$Y = \\beta_0 + (\\beta_1+\\beta_3X_2)X_1 + \\beta_2X_2 + \\epsilon$$\n",
+    "$$Y = \\beta_0 + \\tilde{\\beta_1}X_1 + \\beta_2X_2 + \\epsilon \\hspace{1cm} (\\tilde{\\beta_1} = \\beta_1 + \\beta_3X_2)$$\n",
+    "- You can test if such a model is better again with a low p-value associated with $\\beta_3$ such that evidence provided for $\\beta_3 \\neq 0$ \n",
+    "- Sometimes the interaction term is significant when the main effects are not. The hierarichal principle states that if an interaction in a model is included, then the main effects should be included as well.\n",
+    "- These principles apply to qualitative variables as well:\n",
+    "\n",
+    "No association term:\n",
+    "$$Y = \\beta_1X_1 + \\begin{cases}\\beta_0 + \\beta_2 & \\text{case 1} \\\\ \\beta_0 & \\text{not case 1}\\end{cases}$$\n",
+    "Association term ($\\beta_3$ dummy variable added):\n",
+    "$$Y \\approx \\beta_0 + \\beta_1X_1 + \\begin{cases}\\beta_2 + \\beta_3X_1 & \\text{case 1} \\\\ 0 & \\text{not case 1}\\end{cases}$$\n",
+    "$$Y = \\begin{cases}(\\beta_0 + \\beta_2) + (\\beta_1 + \\beta_3)X_1 & \\text{case 1} \\\\ \\beta_0 + \\beta_1X_1 & \\text{not case 1}\\end{cases}$$\n",
+    "\n",
+    "*Non-linear relationships*\n",
+    "- We can extend relationships to polynomial regression.\n",
+    "- Note that while the following: \n",
+    "$$Y = \\beta_0 + \\beta_1X_1 + \\beta_2X_1^2 +\\epsilon$$\n",
+    "-... uses a non-linear function of X_1, it is still a linear model in that it is still a multiple lienar regression model with X_2 = X_1^2.\n",
+    "- Why don't we just include X^3, X^4 ... X^n? Because of overfitting.\n",
+    "- The approach of extending this linear model is polynomial regression."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "1cdf1edf",
+   "metadata": {},
+   "source": [
+    "##### **Potential Problems**"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "0b9e921b",
+   "metadata": {},
+   "source": [
+    "\n",
+    "The following are potential problems arising from fitting a linear regression onto a dataset:\n",
+    "1. Non-linearity\n",
+    "2. Correlation of error terms\n",
+    "3. Non-constant variance of error terms\n",
+    "4. Outliers\n",
+    "5. High-levarage points\n",
+    "6. Collinearity\n",
+    "\n",
+    "*Non-linearity*\n",
+    "- Linear regression assumes straight-line relationships between X and Y. If the true relationship is not lienar, then the conclusions and predictions from the model are suspect.\n",
+    "- Residual plots plot residuals, $e_i = y_i - \\hat{y}_i$ against $x_i$. With multiple predictors, you plot residuals against predicted values of $\\hat{y}_i$. No pattern in the plot is ideal.\n",
+    "- If residual plots indicate non-linear associations in the data, then non-linear transformations can be used in the regression model.\n",
+    "\n",
+    "*Correlation of Error Terms*\n",
+    "- The linear model assumes $\\epsilon_1, \\epsilon_2,\\ldots,\\epsilon_n$ are uncorrelated. If there was, then the estimated SEs would underestimate the true SEs, causing CIs and PIs to be narrower than they should be. This would also cause p-values to be lower than they should be.\n",
+    "- Correlations among error terms usually occur in time series data, with observations at adjacent time points having positively correlated errors. To test for correlation, residuals can be plotted. No pattern in the residual plot is ideal. Otherwise, tracking in the residuals may occur with adjacent residuals having similar values. See Fig 3.10.\n",
+    "\n",
+    "*Non-constant Variance of Error Terms*\n",
+    "- The linear model assumes that the error terms have constant variance, $\\text{Var}(\\epsilon_i)=\\sigma^2$. This assumption is the basis of SEs, CIs, and hypothesis tests. - Non-constant variances are called heteroscedasticity, and can be identified by a funnel shape in the residual plot.\n",
+    "- A possible solution is to transform Y with a concave function such as log or sqrt. This reduces the magnitude of the larger responses.\n",
+    "- The average of variances is defined with $\\sigma_i^2 = \\sigma^2/n_i$. To remedy homoskedasticity, you can assign weights inversely proportional to the variance to give greater weighting to observations with low variances.\n",
+    "\n",
+    "*Outliers*\n",
+    "- These are defined as points for which $y_i$ is far from the predicted $\\hat{y}_i$.\n",
+    "- Outliers can cause dramatic changes to model fitting metrics such as RSE and R^2 even if it has little effect on the model fit.\n",
+    "- Residual plots can be used to identify outliers again. In practice, it might be difficult to classify which points are residuals. In this case, studentised residuals can be computed by dividing each residual by estimated SE.\n",
+    "\n",
+    "*High leverage Points*\n",
+    "- These are defined as points which have an unusual value for $x_i$. These points can have a more dramatic effect on the impact of the least squares line compared to outliers.\n",
+    "- This problem is more pronounced in multiple regression with more than two predictors as these points can be in the range of individual predictors but are unusual in the full set of predictors.\n",
+    "- The leverage statistic can be used to identify observations with high leverage:\n",
+    "$$h_i = \\frac{1}{n}+\\frac{(x_i-\\bar{x})^2}{\\sum_{i'=1}{n}(x_{i'}-\\bar{x})^2}$$\n",
+    "- In the equation above, h_i increases with distance of x_i from xbar. It is noted that 1/n < h_i < 1, and the average levarage for all observations is (p+1)/n. Higher statistics, especially those exceeding (p+1)/n, may be high leverage points.\n",
+    "\n",
+    "*Collinearity*\n",
+    "- When two or more predictor variables are closely related to each other. \n",
+    "- This is a problem as it can be difficult to separate the individual effects of the collinear variables. \n",
+    "- Contour plots can be made between two coefficents, with each ellipse representing the different combination of coefficients that result with the same RSS. Ellipses nearest to the center take on the lowest values for RSS. \n",
+    "- For collinear coefficients, contour plots will be narrow (See Fig 3.15), with a broad range of values for the same RSSs.\n",
+    "- Collinearity reduces the accuracy of estimates of the regression coefficients, so SE for the coefficients increases. This then causes a decrease in the t-statistic. So, in the presence of collienarity, we may fail to reject H_0 (ie. power of the test reduces).\n",
+    "- Looking at the correlation matrix can help detect collinearity. \n",
+    "- Collinearity may exist between several variables, termed multicollinearity. To assess this, we can compute the variance inflation factor (VIF), the ratio of the variance of $\\hat{\\beta_j}$ when fitting the full model divided by the variance of $\\hat{\\beta_j}$ on its own.\n",
+    "  - VIF = 1 means absence of collienarity.\n",
+    "  - Typically, VIFs > 5 or > 10 indicates a lot of collinearity.\n",
+    "  - $$\\text{VIF}(\\beta_j)=\\frac{1}{1-R^2_{X_j|X-k}}$$\n",
+    "  - ... where $R^2_{X_j|X-k}$ is the R^2 froma regression of X_j onto all other variables. \n",
+    "  - Intuitively, if R^2 is small, then X_j is mostly independent and VIF is close to 1.\n",
+    "- Solutions to collinearity include dropping one of the problematic variables or combining the collinear variables into a single predictor. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a8d2e50c",
+   "metadata": {},
+   "source": [
+    "#### 3.4 The Marketing Plan"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "783692f1",
+   "metadata": {},
+   "source": [
+    "In ISLP, the chapter uses the example of Advertising data to illustrate linear regression. The following are questions which can now be answered from that:\n",
+    "\n",
+    "**1. Is there a relationship between sales and advertising?**\n",
+    "- Fit a multiple linear regression model of sales onto the three predictors. \n",
+    "- The F-statistic has a low p-value suggesting association.\n",
+    "\n",
+    "**2. How strong is the relationship?**\n",
+    "- There are several metrics for model accuracy. For example: RSE and R^2. From them, Xs explain almost 90% of the variance in sales. \n",
+    "\n",
+    "**3. Which media are associated with sales?**\n",
+    "- We can take the p-value of each t-statistic for individual contributions to multiple linear regression. \n",
+    "- TV and radio have low p-values, but not newspaper.\n",
+    "\n",
+    "**4. How large is the association between each medium and sales**\n",
+    "- The SE of the computed coefficients can help construct CIs for the actual coefficient.\n",
+    "- TV and radio have narrow CIs far from zero, while the CI for newspaper includes zero, so the variable is not statistically significant.\n",
+    "- Could collinearity be a reason for the wide SEs? The VIFs for the Xs are all less than 1.2, suggesting no collinearity.\n",
+    "- For association of each medium individually, three separate linear regressions can be performed.\n",
+    "  \n",
+    "**5. How accurately can we predict future sales?**\n",
+    "- The accuracy for this estimate depends on if we are predicting a single response ($Y = f(X) +\\epsilon$), or the average response, $f(X)$. \n",
+    "- The former uses a PI, while the latter uses a CI. PIs are wider than CIs as the account for irreducible error, $\\epsilon$\n",
+    "\n",
+    "**6. Is the relationship linear?**\n",
+    "- Plot residuals to test linearity. \n",
+    "\n",
+    "**7. Is there synergy among the advertising media?**\n",
+    "- Compare the models after adding an interaction term to accomodate non-addivite relationships. Small p-values with this interation suggests presence of relationships.\n",
+    "- Then, check using measures of model accuracy (RSE/R^2)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c5c28104",
+   "metadata": {},
+   "source": [
+    "#### 3.5 Comparison of Linear Regression with KNN"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "89fc677a",
+   "metadata": {},
+   "source": [
+    "- Linear regression is parametric since it assumes f(X) is linear. These types are advantageous as they are easy to fit, only require estimate of a small number of coefficients. A disadvantage though is the several assumptions required. If the actual relationship is not linear, then the parametric method will be poor.\n",
+    "- Non-parametric models do not assume a parametric form of f(X). KNN regression is one of the simplest non parametric methods.\n",
+    "\n",
+    "KNN\n",
+    "- Given a value for K and a prediction point $x_0$, KNN identifies the K closest training observations to $x_0$, represented by $\\mathcal{N_0}$. It then estimates $f(x_0)$ using the average of $\\mathcal{N_0}:$\n",
+    "$$\\hat{f}(x_0) = \\frac{1}{K}\\sum_{x_i \\in \\mathcal{N_0}}y_i$$\n",
+    "- KNNs manifest as a step function, but higher Ks smoothen the step function out. The optimal value of K relies on the bias-variance tradeoff - small Ks will be more flexible (low bias, high variance). Higher Ks are less flexible, with high biases and low fvariances.\n",
+    "- The parametric approach outperforms the non-parametric approach if the parametric form is close to the true form of the function. \n",
+    "- In terms of MSE, KNN performs only a little worse than OLS regression if K is large, and much worse when K is small (assuming the actual relationship is close to the chosen parametric form)\n",
+    "- In real life, one might think that KNN should be favoured over OLS as it will be at worst slightly inferior to linear regression, but in reality, even when the true relationship is highly non-linear, KNN is still inferior to OLS especially with p > 1.\n",
+    "- An increase in dimension is associated with only small changes in OLS MSE (compared to KNN, for a non-linear relationship in this case) since higher dimensions have an effective reduction in sample size. The curse of dimensionality is when, in KNN, the K nearest observations to x_0 are very far away from x_0 in p-dimensional space when p is large, causing a poor KNN fit. Even at small dimensions, OLS may be preferred over KNN for interpretability. "
+   ]
+  }
+ ],
+ "metadata": {
+  "language_info": {
+   "name": "python"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
